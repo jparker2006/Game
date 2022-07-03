@@ -14,8 +14,12 @@
 // opengl headers
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <cglm/cglm.h>
+#include <cglm/struct.h>
 
 float fmodf(float a, float b);
 char* LoadFile(const char *source);
+float deg_to_radians(float fDeg);
+float frustumScale(float fFOVDeg);
 
 #endif // UTILITY_H

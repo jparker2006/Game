@@ -27,3 +27,11 @@ char* LoadFile(const char *source) {
     }
     return buffer;
 }
+
+float deg_to_radians(float fDeg) {
+    return fDeg * (TAU / 360.0f);
+}
+
+float frustumScale(float fFOVDeg) {
+    return 1.0f / tan(deg_to_radians(fFOVDeg) / 2.0f);
+}
