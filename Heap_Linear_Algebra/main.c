@@ -2,11 +2,7 @@
 #include "matrix.h"
 
 int main(int argc, char *argv[]) {
-    struct Matrix *mat = mat_new(4, 4);
-    mat_scl(mat, '+', 3.0f);
-    struct Matrix *mat2 = mat_new(4, 4);
-    mat_scl(mat2, '-', 3.0f);
-    mat_dot(mat, mat2);
+    struct Matrix *mat = mat_shearing(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f);
     mat_out(mat);
     mat_delete(mat);
     return 0;

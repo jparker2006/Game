@@ -1,4 +1,4 @@
-#include "matrix.h"
+#include "../include/matrix.h"
 
 struct Matrix *mat_new(int rows, int cols) {
     struct Matrix *mat = (struct Matrix *) malloc(sizeof(struct Matrix));
@@ -131,69 +131,4 @@ void mat_dot(struct Matrix *chmat, struct Matrix *omat) {
             chmat->data[i][j] = sum;
         }
     }
-}
-
-struct Matrix *mat_identity(int nSIZE) {
-    struct Matrix *mat = mat_new(nSIZE, nSIZE);
-    for (int i=0; i<nSIZE; i++) {
-        mat->data[i][i] = 1.0f;
-    }
-    return mat;
-}
-
-struct Matrix *mat_translation(float fx, float fy, float fz) {
-    struct Matrix *mat = mat_identity(4);
-    mat->data[0][3] = fx;
-    mat->data[1][3] = fy;
-    mat->data[2][3] = fz;
-    return mat;
-}
-
-struct Matrix *mat_scaling(float fx, float fy, float fz) {
-    struct Matrix *mat = mat_identity(4);
-    mat->data[0][0] = fx;
-    mat->data[1][1] = fy;
-    mat->data[2][2] = fz;
-    return mat;
-}
-
-struct Matrix *mat_shearing(float fxy, float fxz, float fyx, float fyz, float fzx, float fzy) {
-    struct Matrix *mat = mat_identity(4);
-    mat->data[0][1] = fxy;
-    mat->data[0][2] = fxz;
-    mat->data[1][0] = fyx;
-    mat->data[1][2] = fyz;
-    mat->data[2][0] = fzx;
-    mat->data[2][1] = fzy;
-    return mat;
-}
-
-struct Matrix *mat_rx(float r) {
-    struct Matrix *mat = mat_identity(4);
-    float cosine = cosf(r), sine = sinf(r);
-    mat->data[1][1] = cosine;
-    mat->data[1][2] =  -sine;
-    mat->data[2][1] =   sine;
-    mat->data[2][2] = cosine;
-    return mat;
-}
-
-struct Matrix *mat_ry(float r) {
-    struct Matrix *mat = mat_identity(4);
-    float cosine = cosf(r), sine = sinf(r);
-    mat->data[0][0] = cosine;
-    mat->data[0][2] =   sine;
-    mat->data[2][0] =  -sine;
-    mat->data[2][2] = cosine;
-    return mat;
-}
-
-struct Matrix *mat_rz(float r) {
-    struct Matrix *mat = mat_identity(4);
-    float cosine = cosf(r), sine = sinf(r);
-    mat->data[0][0] = cosine;
-    mat->data[0][1] =  -sine;
-    mat->data[1][0] =   sine;
-    mat->data[1][1] = cosine;
-    return mat;
 }

@@ -6,33 +6,14 @@ float ComputeAngleRad(float fElapsedTime, float fLoopDuration) {
     return fCurrTimeThroughLoop * fScale;
 }
 
-// mat4 mRotateX(float fElapsedTime) {
-//     float fAngRad = ComputeAngleRad(fElapsedTime, 3.0);
-//     float fCos = cosf(fAngRad);
-//     float fSin = sinf(fAngRad);
-//     mat4 matrice = GLM_MAT4_IDENTITY_INIT;
-//     glm_mat4_print(matrice, stderr);
-// //     glm_mat4_identity(matrice);
-//     return (mat4 []){{matrice}};
-// }
-
 /*
-{ 1.0f, 0.0f, 0.0f, 0.0f,
-  0.0f, fCos, fSin, 0.0f,
-  1.0f, -fSin, fCos, 0.0f,
-  0.0f, 0.0f, 0.0f, 1.0f, };
+{
+1.0f, 0.0f, 0.0f, 0.0f,
+0.0f, fCos, fSin, 0.0f,
+1.0f, -fSin, fCos, 0.0f,
+0.0f, 0.0f, 0.0f, 1.0f,
+};
 */
-
-vec3s OvalOffset(float fElapsedTime) {
-    const float fLoopDuration = 3.0f;
-    const float fScale = TAU / fLoopDuration;
-    float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
-    return (vec3s){{cosf(fCurrTimeThroughLoop * fScale) * 4.0f, sinf(fCurrTimeThroughLoop * fScale) * 6.0f, -20.0f}};
-}
-
-vec3s BottomCircleOffset(float fElapsedTime) {
-    return (vec3s){{0.0f, 0.0f, -15.0f}};
-}
 
 int main(int argc, char *argv[]) {
     initializeGLFW();
@@ -43,22 +24,22 @@ int main(int argc, char *argv[]) {
     }
 
     shaderProgram = buildShaders();
+    cameraToClipMatrix = mat_new(4, 4);
 
-    unsigned int modelToCameraMatrixUnif = glGetUniformLocation(shaderProgram, "modelToCameraMatrix");
     unsigned int cameraToClipMatrixUnif = glGetUniformLocation(shaderProgram, "cameraToClipMatrix");
 
     float fzNear = 1.0f;
     float fzFar = 61.0f;
     float fFrustumScale = frustumScale(45.0f);
 
-    cameraToClipMatrix[0][0] = fFrustumScale;
-    cameraToClipMatrix[1][1] = fFrustumScale;
-    cameraToClipMatrix[2][2] = (fzFar + fzNear) / (fzNear - fzFar);
-    cameraToClipMatrix[2][3] = -1.0f;
-    cameraToClipMatrix[3][2] = (2 * fzFar * fzNear) / (fzNear - fzFar);
+    cameraToClipMatrix->data[0][0] = fFrustumScale;
+    cameraToClipMatrix->data[1][1] = fFrustumScale;
+    cameraToClipMatrix->data[2][2] = (fzFar + fzNear) / (fzNear - fzFar);
+    cameraToClipMatrix->data[2][3] = -1.0f;
+    cameraToClipMatrix->data[3][2] = (2 * fzFar * fzNear) / (fzNear - fzFar);
 
     glUseProgram(shaderProgram);
-    glUniformMatrix4fv(cameraToClipMatrixUnif, 1, GL_FALSE, &cameraToClipMatrix[0][0]);
+    glUniformMatrix4fv(cameraToClipMatrixUnif, 1, GL_FALSE, &cameraToClipMatrix->data[0][0]);
     glUseProgram(0);
 
     // VBO & IBO inits
@@ -104,6 +85,8 @@ int main(int argc, char *argv[]) {
     }
 
     glfwTerminate();
+
+    mat_delete(cameraToClipMatrix);
     return 0;
 }
 
@@ -122,37 +105,23 @@ void display(GLFWwindow* window, unsigned int shaderProgram) {
     glBindVertexArray(VAO);
 
     float fElapsedTime = glfwGetTime();
-//     mat4 transformMatrix = mRotateX(fElapsedTime);
-    mat4 transformMatrix = GLM_MAT4_IDENTITY_INIT;
-    vec3s offset = BottomCircleOffset(fElapsedTime);
-
     float fAngRad = ComputeAngleRad(fElapsedTime, 3.0f);
     float fCos = cosf(fAngRad);
     float fSin = sinf(fAngRad);
 
-    transformMatrix[1][1] = fCos;
-    transformMatrix[1][2] = -fSin;
-    transformMatrix[2][1] = fSin;
-    transformMatrix[2][2] = fCos;
+    struct Matrix *transformMatrix = mat_new(4, 4);
+    transformMatrix->data[0][0] =   1.0f;
+    transformMatrix->data[1][1] =   fCos;
+    transformMatrix->data[1][2] =  -fSin;
+    transformMatrix->data[2][1] =   fSin;
+    transformMatrix->data[2][2] =   fCos;
+    transformMatrix->data[3][2] = -15.0f;
+    transformMatrix->data[3][3] =   1.0f;
 
-    transformMatrix[3][0] = offset.x;
-    transformMatrix[3][1] = offset.y;
-    transformMatrix[3][2] = offset.z;
-    transformMatrix[3][3] = 1.0f;
-    glUniformMatrix4fv(modelToCameraMatrixUnif, 1, GL_FALSE, &transformMatrix[0][0]);
+//     mat_out()
+//     mat_out(transformMatrix);
+    glUniformMatrix4fv(modelToCameraMatrixUnif, 1, GL_FALSE, &transformMatrix->data[0][0]);
     glDrawElements(GL_TRIANGLES, lnIBO, GL_UNSIGNED_SHORT, 0);
-
-//     glm_mat4_identity(transformMatrix);
-//     vec3s offset = OvalOffset(fElapsedTime);
-//     transformMatrix[0][0] = 0.3f;
-//     transformMatrix[1][1] = 0.3f;
-//     transformMatrix[2][2] = 0.3f;
-//     transformMatrix[3][0] = offset.x;
-//     transformMatrix[3][1] = offset.y;
-//     transformMatrix[3][2] = offset.z;
-//     transformMatrix[3][3] = 1.0f;
-//     glUniformMatrix4fv(modelToCameraMatrixUnif, 1, GL_FALSE, &transformMatrix[0][0]);
-//     glDrawElements(GL_TRIANGLES, lnIBO, GL_UNSIGNED_SHORT, 0);
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -169,7 +138,7 @@ void initializeGLFW() {
 }
 
 GLFWwindow* buildWindow() {
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL Test", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", NULL, NULL);
     if (NULL == window) {
         printf("Failed to create GLFW window\n");
         glfwTerminate();
@@ -237,29 +206,11 @@ void keyboard(GLFWwindow *window) {
 
 void resize_window(GLFWwindow* window, int width, int height) {
     float fFrustumScale = frustumScale(45.0f);
-    cameraToClipMatrix[0][0] = fFrustumScale / (width / (float) height);
-    cameraToClipMatrix[1][1] = fFrustumScale;
-
+    cameraToClipMatrix->data[0][0] = fFrustumScale / (width / (float) height);
+    cameraToClipMatrix->data[1][1] = fFrustumScale;
     glUseProgram(shaderProgram);
     unsigned int cameraToClipMatrixUnif = glGetUniformLocation(shaderProgram, "cameraToClipMatrix");
-    glUniformMatrix4fv(cameraToClipMatrixUnif, 1, GL_FALSE, &cameraToClipMatrix[0][0]);
+    glUniformMatrix4fv(cameraToClipMatrixUnif, 1, GL_FALSE, &cameraToClipMatrix->data[0][0]);
     glUseProgram(0);
-
     glViewport(0, 0, width, height);
 }
-/*
-void ComputePositionOffsets(float *fOffsets) {
-    fOffsets[1] = -0.1f;
-}
-
-void AdjustVertexData(float *fOffsets) {
-    int nLength = (sizeof(vertices) / sizeof(float) / 2) - 1;
-    for (int i=0; i<nLength; i+=4) {
-        vertices[i] += fOffsets[0];
-        vertices[i+1] += fOffsets[1];
-    }
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, (sizeof(vertices) / 2), &vertices[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-*/
