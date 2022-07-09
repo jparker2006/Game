@@ -9,10 +9,12 @@
 
 struct Matrix {
     int rows, cols;
-    float **data;
+    float *data;
 };
 
 struct Matrix *mat_new(int rows, int cols);
+void mat_e(struct Matrix *mat, int row, int col, float val);
+float mat_g(struct Matrix *mat, int row, int col);
 void mat_out(struct Matrix *mat);
 void mat_delete(struct Matrix *mat);
 void mat_scl(struct Matrix *mat, char op, float val);

@@ -14,8 +14,8 @@
 // opengl headers
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-// #include <cglm/cglm.h>
-// #include <cglm/struct.h>
+#include <cglm/cglm.h>
+#include <cglm/struct.h>
 
 float fmodf(float a, float b);
 char* LoadFile(const char *source);

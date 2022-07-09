@@ -2,7 +2,9 @@
 #include "matrix.h"
 
 int main(int argc, char *argv[]) {
-    struct Matrix *mat = mat_shearing(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f);
+    struct Matrix *mat = mat_rx(3.0f);
+    struct Matrix *mat2 = mat_identity(4);
+    mat_dot(mat, mat2);
     mat_out(mat);
     mat_delete(mat);
     return 0;
