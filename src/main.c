@@ -14,34 +14,32 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    // camera matrice & shaders init
     shaderProgram = buildShaders();
-
     unsigned int modelToCameraMatrixUnif = glGetUniformLocation(shaderProgram, "modelToCameraMatrix");
     unsigned int cameraToClipMatrixUnif = glGetUniformLocation(shaderProgram, "cameraToClipMatrix");
-
     float fzNear = 1.0f;
     float fzFar = 61.0f;
     float fFrustumScale = frustumScale(45.0f);
-
-    cameraToClipMatrix[0][0] = fFrustumScale;
-    cameraToClipMatrix[1][1] = fFrustumScale;
-    cameraToClipMatrix[2][2] = (fzFar + fzNear) / (fzNear - fzFar);
-    cameraToClipMatrix[2][3] = -1.0f;
-    cameraToClipMatrix[3][2] = (2 * fzFar * fzNear) / (fzNear - fzFar);
-
+    cameraToClipMatrix = mat_identity(4);
+    cameraToClipMatrix->data[0] = fFrustumScale;
+    cameraToClipMatrix->data[5] = fFrustumScale;
+    cameraToClipMatrix->data[10] = (fzFar + fzNear) / (fzNear - fzFar);
+    cameraToClipMatrix->data[11] = -1.0f;
+    cameraToClipMatrix->data[14] = (2 * fzFar * fzNear) / (fzNear - fzFar);
     glUseProgram(shaderProgram);
-    glUniformMatrix4fv(cameraToClipMatrixUnif, 1, GL_FALSE, &cameraToClipMatrix[0][0]);
+    glUniformMatrix4fv(cameraToClipMatrixUnif, 1, GL_FALSE, &cameraToClipMatrix->data[0]);
     glUseProgram(0);
 
     // VBO & IBO inits
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &IBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STREAM_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // VAO inits
@@ -93,44 +91,26 @@ void display(GLFWwindow* window, unsigned int shaderProgram) {
     glBindVertexArray(VAO);
 
     float fElapsedTime = glfwGetTime();
-//     float transformMatrix[4][4] = {
-//         { 1.0f, 0.0f, 0.0f, 0.0f },
-//         { 0.0f, 1.0f, 0.0f, 0.0f },
-//         { 0.0f, 0.0f, 1.0f, 0.0f },
-//         { 0.0f, 0.0f, 0.0f, 1.0f },
-//     };
-
-    float *transformMatrix = (float*) malloc(16 * sizeof(float *));
-
     float fAngRad = ComputeAngleRad(fElapsedTime, 3.0f);
-    float fCos = cosf(fAngRad);
-    float fSin = sinf(fAngRad);
 
-    transformMatrix[0] = 1.0f;
-    transformMatrix[5] = fCos;
-    transformMatrix[6] = -fSin;
-    transformMatrix[9] = fSin;
-    transformMatrix[10] = fCos;
-    transformMatrix[14] = -15.0f;
-    transformMatrix[15] = 1.0f;
+    struct Matrix *rx = mat_rx(fAngRad);
+    float scale = 0.08f;
+//     struct Matrix *rx = mat_scaling(scale, scale, scale);
+    struct Matrix *ry = mat_ry(fAngRad);
+    struct Matrix *rz = mat_rz(fAngRad);
 
-    glUniformMatrix4fv(modelToCameraMatrixUnif, 1, GL_FALSE, &transformMatrix[0]);
+//     mat_dot(rx, ry);
+//     mat_dot(rx, rz);
+
+    rx->data[14] = -15.0f;
+
+    glUniformMatrix4fv(modelToCameraMatrixUnif, 1, GL_FALSE, &rx->data[0]);
     glDrawElements(GL_TRIANGLES, lnIBO, GL_UNSIGNED_SHORT, 0);
 
-    free(transformMatrix);
 
-
-//     glm_mat4_identity(transformMatrix);
-//     vec3s offset = OvalOffset(fElapsedTime);
-//     transformMatrix[0][0] = 0.3f;
-//     transformMatrix[1][1] = 0.3f;
-//     transformMatrix[2][2] = 0.3f;
-//     transformMatrix[3][0] = offset.x;
-//     transformMatrix[3][1] = offset.y;
-//     transformMatrix[3][2] = offset.z;
-//     transformMatrix[3][3] = 1.0f;
-//     glUniformMatrix4fv(modelToCameraMatrixUnif, 1, GL_FALSE, &transformMatrix[0][0]);
-//     glDrawElements(GL_TRIANGLES, lnIBO, GL_UNSIGNED_SHORT, 0);
+    mat_delete(rx);
+    mat_delete(ry);
+    mat_delete(rz);
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -215,13 +195,11 @@ void keyboard(GLFWwindow *window) {
 
 void resize_window(GLFWwindow* window, int width, int height) {
     float fFrustumScale = frustumScale(45.0f);
-    cameraToClipMatrix[0][0] = fFrustumScale / (width / (float) height);
-    cameraToClipMatrix[1][1] = fFrustumScale;
-
+    cameraToClipMatrix->data[0] = fFrustumScale / (width / (float) height);
+    cameraToClipMatrix->data[5] = fFrustumScale;
     glUseProgram(shaderProgram);
     unsigned int cameraToClipMatrixUnif = glGetUniformLocation(shaderProgram, "cameraToClipMatrix");
-    glUniformMatrix4fv(cameraToClipMatrixUnif, 1, GL_FALSE, &cameraToClipMatrix[0][0]);
+    glUniformMatrix4fv(cameraToClipMatrixUnif, 1, GL_FALSE, &cameraToClipMatrix->data[0]);
     glUseProgram(0);
-
     glViewport(0, 0, width, height);
 }

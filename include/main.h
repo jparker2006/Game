@@ -3,6 +3,8 @@
 
 // my files
 #include "../include/utility.h"
+#include "../include/matrix.h"
+#include "../include/vector.h"
 
 // window dimensions
 const unsigned int WIDTH = 600;
@@ -12,18 +14,13 @@ const unsigned int HEIGHT = 600;
 unsigned int shaderProgram;
 
 // background color
-float bg_rgb[] = { 0.4f, 0.4f, 0.4f, 0.0f };
+float bg_rgb[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 // vertex array & buffer objects
 unsigned int VAO, VBO, IBO;
 
 // perspective matrix
-float cameraToClipMatrix[4][4] = {
-	{ 1.0f, 0.0f, 0.0f, 0.0f },
-	{ 0.0f, 1.0f, 0.0f, 0.0f },
-	{ 0.0f, 0.0f, 1.0f, 0.0f },
-	{ 0.0f, 0.0f, 0.0f, 1.0f },
-};
+struct Matrix *cameraToClipMatrix;
 
 // functions
 void initializeGLFW();

@@ -1,10 +1,10 @@
-#include "matrix.h"
+#include "../include/matrix.h"
 
 struct Matrix *mat_new(int rows, int cols) {
     struct Matrix *mat = (struct Matrix *) malloc(sizeof(struct Matrix));
     mat->rows = rows;
     mat->cols = cols;
-    mat->data = (float*) malloc(cols * rows * sizeof(float *));
+    mat->data = (float*) calloc(cols * rows, sizeof(float));
     return mat;
 }
 
@@ -102,6 +102,7 @@ void mat_ew(struct Matrix *chmat, char op, struct Matrix *omat) {
     }
 }
 
+// refac to !use g, e
 void mat_dot(struct Matrix *chmat, struct Matrix *omat) {
     if (chmat->cols != omat->rows) {
         printf("\nPANIC: matrices cant be dotted\n");
@@ -111,9 +112,9 @@ void mat_dot(struct Matrix *chmat, struct Matrix *omat) {
         for (int j=0; j<omat->cols; j++) {
             float sum = 0.0;
             for (int k=0; k<chmat->cols; k++) {
-                sum += chmat->data[i * chmat->rows + k] * omat->data[k * omat->rows + j];
+                sum += mat_g(chmat, i, k) * mat_g(omat, k, j);
             }
-            chmat->data[i * chmat->rows + j] = sum;
+            mat_e(chmat, i, j, sum);
         }
     }
 }
