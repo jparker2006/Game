@@ -29,51 +29,66 @@ unsigned int buildShaders();
 void display(GLFWwindow* window, unsigned int shaderProgram);
 void keyboard(GLFWwindow *window);
 void resize_window(GLFWwindow* window, int width, int height);
-void ComputePositionOffsets(float *fOffsets); // fOffsets[0] = x offset, fOffsets[1] = y offset
-void AdjustVertexData(float *fOffsets);
 
 const int numberOfVertices = 8;
 
-#define GREEN_COLOR 0.75f, 0.75f, 1.0f, 1.0f
-#define BLUE_COLOR 0.0f, 0.5f, 0.0f, 1.0f
-#define RED_COLOR 1.0f, 0.0f, 0.0f, 1.0f
-#define GREY_COLOR 0.8f, 0.8f, 0.8f, 1.0f
-#define BROWN_COLOR 0.5f, 0.5f, 0.0f, 1.0f
+#define C_RED   1.0f, 0.0f, 0.0f, 1.0f
+#define C_GREEN 0.0f, 1.0f, 0.0f, 1.0f
+#define C_BLUE  0.0f, 0.0f, 1.0f, 1.0f
+
+#define BC 1.0f // block coordinate
 
 const float vertices[] = {
-	+1.0f, +1.0f, +1.0f,
-	-1.0f, -1.0f, +1.0f,
-	-1.0f, +1.0f, -1.0f,
-	+1.0f, -1.0f, -1.0f,
+	 BC,  BC, BC,
+	 BC, -BC, BC,
+	-BC, -BC, BC,
+	-BC,  BC, BC,
+	 BC,  BC, -BC,
+	 BC, -BC, -BC,
+	-BC, -BC, -BC,
+	-BC,  BC, -BC,
 
-	-1.0f, -1.0f, -1.0f,
-	+1.0f, +1.0f, -1.0f,
-	+1.0f, -1.0f, +1.0f,
-	-1.0f, +1.0f, +1.0f,
-
-	GREEN_COLOR,
-	BLUE_COLOR,
-	RED_COLOR,
-	BROWN_COLOR,
-
-	GREEN_COLOR,
-	BLUE_COLOR,
-	RED_COLOR,
-	BROWN_COLOR,
+	C_BLUE,
+	C_BLUE,
+	C_BLUE,
+	C_BLUE,
+	C_BLUE,
+	C_BLUE,
+	C_BLUE,
+	C_BLUE,
 };
 
-const GLshort indexData[] =
-{
-//Object 1
+const GLshort indexData[] = {
+	// front face
 	0, 1, 2,
-	1, 0, 3,
-	2, 3, 0,
-	3, 2, 1,
+	0, 2, 3,
 
-	5, 4, 6,
-	4, 5, 7,
-	7, 6, 4,
-	6, 7, 5,
+	// back face
+	4, 5, 6,
+	4, 6, 7,
+
+	// top face
+	0, 4, 7,
+	7, 3, 0,
+
+	// left face
+	0, 4, 5,
+	5, 1, 0,
+
+	// right face
+	3, 7, 6,
+	6, 2, 3,
+
+	// bottom face
+	1, 5, 6,
+	6, 2, 1,
 };
 
 #endif // MAIN_H
+
+
+
+
+
+
+

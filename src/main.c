@@ -1,5 +1,7 @@
 #include "../include/main.h"
 
+float velo = -0.01f, accel = 0.0f, grav = -0.005f;
+
 float ComputeAngleRad(float fElapsedTime, float fLoopDuration) {
     const float fScale = TAU / fLoopDuration;
     float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
@@ -34,12 +36,12 @@ int main(int argc, char *argv[]) {
     // VBO & IBO inits
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &IBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STREAM_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // VAO inits
@@ -51,7 +53,7 @@ int main(int argc, char *argv[]) {
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)colorDataOffset);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*) colorDataOffset);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
 	glBindVertexArray(0);
@@ -67,7 +69,7 @@ int main(int argc, char *argv[]) {
 
     glEnable(GL_DEPTH_CLAMP);
 
-//     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ); // to see wireframe
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ); // to see wireframe
     while (!glfwWindowShouldClose(window)) {
         display(window, shaderProgram);
     }
@@ -93,24 +95,31 @@ void display(GLFWwindow* window, unsigned int shaderProgram) {
     float fElapsedTime = glfwGetTime();
     float fAngRad = ComputeAngleRad(fElapsedTime, 3.0f);
 
-    struct Matrix *rx = mat_rx(fAngRad);
-    float scale = 0.08f;
-//     struct Matrix *rx = mat_scaling(scale, scale, scale);
-    struct Matrix *ry = mat_ry(fAngRad);
-    struct Matrix *rz = mat_rz(fAngRad);
+    struct Matrix *rx = mat_ry(0.26);
+//     printf("%f\n", fAngRad / TAU);
 
-//     mat_dot(rx, ry);
-//     mat_dot(rx, rz);
+//     struct Matrix *rx = mat_identity(4);
+    rx->data[13] = -3.4f;
+    rx->data[14] = -14.0f;
 
-    rx->data[14] = -15.0f;
+//     struct Matrix *rx = mat_rz(fAngRad);
+//     rx->data[14] = -4.0f;
+//     rx->data[13] = 1.0f;
+//     accel += grav;
+//     rx->data[13] += velo;
+//     velo += accel;
+//     accel = 0.0f;
+//     if (rx->data[13] < -1.0f) {
+//         mat_delete(rx);
+//         rx = mat_identity(4);
+//         rx->data[13] = -1.0f;
+//         rx->data[14] = -4.0f;
+//     }
 
     glUniformMatrix4fv(modelToCameraMatrixUnif, 1, GL_FALSE, &rx->data[0]);
     glDrawElements(GL_TRIANGLES, lnIBO, GL_UNSIGNED_SHORT, 0);
 
-
     mat_delete(rx);
-    mat_delete(ry);
-    mat_delete(rz);
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -139,8 +148,8 @@ GLFWwindow* buildWindow() {
 }
 
 unsigned int buildShaders() {
-    const char *vertexShaderSource = LoadFile("/home/jparker/SomethingOpenGL/3d_Fork/shaders/standard.vert");
-    const char *fragmentShaderSource = LoadFile("/home/jparker/SomethingOpenGL/3d_Fork/shaders/standard.frag");
+    const char *vertexShaderSource = LoadFile("/home/jparker/SomethingOpenGL/shaders/standard.vert");
+    const char *fragmentShaderSource = LoadFile("/home/jparker/SomethingOpenGL/shaders/standard.frag");
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
