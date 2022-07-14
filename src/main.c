@@ -1,6 +1,8 @@
 #include "../include/main.h"
 
-float velo = -0.01f, accel = 0.0f, grav = -0.005f;
+void init_cube_vector() {
+    vCubes = vec_new(-1);
+}
 
 float ComputeAngleRad(float fElapsedTime, float fLoopDuration) {
     const float fScale = TAU / fLoopDuration;
@@ -15,6 +17,9 @@ int main(int argc, char *argv[]) {
         printf("Failed to initialize GLAD\n");
         return -1;
     }
+
+    vertices = cube_vertices();
+
 
     // camera matrice & shaders init
     shaderProgram = buildShaders();
@@ -36,24 +41,25 @@ int main(int argc, char *argv[]) {
     // VBO & IBO inits
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    size_t vSize = sizeof(float) * 8 * 3 + sizeof(float) * 8 * 4;
+    glBufferData(GL_ARRAY_BUFFER, vSize, vertices, GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &IBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STREAM_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // VAO inits
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    size_t colorDataOffset = sizeof(float) * 3 * numberOfVertices;
+    size_t colorOffset = sizeof(float) * 3 * numberOfVertices;
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*) colorDataOffset);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*) colorOffset);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
 	glBindVertexArray(0);
@@ -66,15 +72,17 @@ int main(int argc, char *argv[]) {
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
     glDepthRange(0.0f, 1.0f);
-
     glEnable(GL_DEPTH_CLAMP);
 
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ); // to see wireframe
+
     while (!glfwWindowShouldClose(window)) {
         display(window, shaderProgram);
     }
 
     glfwTerminate();
+    free(vertices);
+
     return 0;
 }
 
@@ -85,7 +93,7 @@ void display(GLFWwindow* window, unsigned int shaderProgram) {
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    int lnIBO = sizeof(indexData) / sizeof(const GLshort);
+    int lnIBO = sizeof(indexData) / sizeof(const unsigned short);
     unsigned int modelToCameraMatrixUnif = glGetUniformLocation(shaderProgram, "modelToCameraMatrix");
 
     glUseProgram(shaderProgram);
@@ -95,28 +103,13 @@ void display(GLFWwindow* window, unsigned int shaderProgram) {
     float fElapsedTime = glfwGetTime();
     float fAngRad = ComputeAngleRad(fElapsedTime, 3.0f);
 
-    struct Matrix *rx = mat_ry(0.26);
-//     printf("%f\n", fAngRad / TAU);
-
-//     struct Matrix *rx = mat_identity(4);
-    rx->data[13] = -3.4f;
-    rx->data[14] = -14.0f;
-
-//     struct Matrix *rx = mat_rz(fAngRad);
-//     rx->data[14] = -4.0f;
-//     rx->data[13] = 1.0f;
-//     accel += grav;
-//     rx->data[13] += velo;
-//     velo += accel;
-//     accel = 0.0f;
-//     if (rx->data[13] < -1.0f) {
-//         mat_delete(rx);
-//         rx = mat_identity(4);
-//         rx->data[13] = -1.0f;
-//         rx->data[14] = -4.0f;
-//     }
-
+//     struct Matrix *rx = mat_ry(PI / 2);
+//     struct Matrix *rx = mat_rx(PI);
+//     struct Matrix *rx = mat_ry(PI * 1.5);
+//     struct Matrix *rx = mat_ry(fAngRad);
+    struct Matrix *rx = mat_identity(4);
     glUniformMatrix4fv(modelToCameraMatrixUnif, 1, GL_FALSE, &rx->data[0]);
+
     glDrawElements(GL_TRIANGLES, lnIBO, GL_UNSIGNED_SHORT, 0);
 
     mat_delete(rx);

@@ -5,6 +5,7 @@
 #include "../include/utility.h"
 #include "../include/matrix.h"
 #include "../include/vector.h"
+#include "../include/cube.h"
 
 // window dimensions
 const unsigned int WIDTH = 600;
@@ -36,59 +37,44 @@ const int numberOfVertices = 8;
 #define C_GREEN 0.0f, 1.0f, 0.0f, 1.0f
 #define C_BLUE  0.0f, 0.0f, 1.0f, 1.0f
 
-#define BC 1.0f // block coordinate
+struct Vector* vCubes;
 
-const float vertices[] = {
-	 BC,  BC, BC,
-	 BC, -BC, BC,
-	-BC, -BC, BC,
-	-BC,  BC, BC,
-	 BC,  BC, -BC,
-	 BC, -BC, -BC,
-	-BC, -BC, -BC,
-	-BC,  BC, -BC,
+#define BC 0.04f // block size
+#define OFF 0.24f
 
-	C_BLUE,
-	C_BLUE,
-	C_BLUE,
-	C_BLUE,
-	C_BLUE,
-	C_BLUE,
-	C_BLUE,
-	C_BLUE,
-};
+float *vertices;
 
-const GLshort indexData[] = {
-	// front face
+const unsigned short indexData[] = {
+	// front
 	0, 1, 2,
-	0, 2, 3,
-
-	// back face
-	4, 5, 6,
-	4, 6, 7,
-
-	// top face
-	0, 4, 7,
-	7, 3, 0,
-
-	// left face
-	0, 4, 5,
-	5, 1, 0,
-
-	// right face
-	3, 7, 6,
-	6, 2, 3,
-
-	// bottom face
-	1, 5, 6,
-	6, 2, 1,
+	1, 0, 3,
+	2, 3, 0,
+	3, 2, 1,
+	// back
+	5, 4, 6,
+	4, 5, 7,
+	7, 6, 4,
+	6, 7, 5,
+	// bottom
+	1, 6, 5,
+	1, 2, 6,
+	2, 1, 5,
+	5, 6, 2,
+	// top
+	0, 7, 4,
+	0, 3, 7,
+	3, 4, 7,
+	3, 0, 4,
+	// right
+	1, 0, 4,
+	4, 5, 1,
+	0, 1, 5,
+	5, 4, 0,
+	// left
+	6, 7, 3,
+	3, 2, 6,
+	6, 2, 7,
+	7, 2, 3,
 };
 
 #endif // MAIN_H
-
-
-
-
-
-
-
