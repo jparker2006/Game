@@ -1,7 +1,14 @@
 #include "../include/main.h"
 
-void init_cube_vector() {
-    vCubes = vec_new(-1);
+void init_vertices(int nCUBES) {
+    vertices = cadd_vertices(vCubes, vertices, nCUBES);
+}
+
+void init_cube_vector(int nCUBES) {
+    vCubes = (struct Cube**) malloc(sizeof(struct Cube*) * nCUBES);
+    vCubes[0] = cube_new(0.0f, 0.0f, 0.0f);
+    vCubes[1] = cube_new(0.3f, 0.0f, 0.0f);
+    init_vertices(nCUBES);
 }
 
 float ComputeAngleRad(float fElapsedTime, float fLoopDuration) {
@@ -18,8 +25,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    vertices = cube_vertices();
-
+    init_cube_vector(2);
 
     // camera matrice & shaders init
     shaderProgram = buildShaders();
@@ -54,7 +60,7 @@ int main(int argc, char *argv[]) {
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    size_t colorOffset = sizeof(float) * 3 * numberOfVertices;
+    size_t colorOffset = sizeof(float) * 3 * 8;
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);

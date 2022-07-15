@@ -31,16 +31,11 @@ void display(GLFWwindow* window, unsigned int shaderProgram);
 void keyboard(GLFWwindow *window);
 void resize_window(GLFWwindow* window, int width, int height);
 
-const int numberOfVertices = 8;
-
 #define C_RED   1.0f, 0.0f, 0.0f, 1.0f
 #define C_GREEN 0.0f, 1.0f, 0.0f, 1.0f
 #define C_BLUE  0.0f, 0.0f, 1.0f, 1.0f
 
-struct Vector* vCubes;
-
-#define BC 0.04f // block size
-#define OFF 0.24f
+struct Cube** vCubes;
 
 float *vertices;
 
