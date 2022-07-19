@@ -147,8 +147,8 @@ GLFWwindow* buildWindow() {
 }
 
 unsigned int buildShaders() {
-    const char *vertexShaderSource = LoadFile("/home/jparker/SomethingOpenGL/shaders/standard.vert");
-    const char *fragmentShaderSource = LoadFile("/home/jparker/SomethingOpenGL/shaders/standard.frag");
+    const char *vertexShaderSource = LoadFile("/home/jparker/SomethingOpenGL/shaders/vbasic.vert");
+    const char *fragmentShaderSource = LoadFile("/home/jparker/SomethingOpenGL/shaders/fbasic.frag");
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
