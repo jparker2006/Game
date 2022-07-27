@@ -1,2 +1,2 @@
 # Open GL Game
-Writing a game / game engine in C Open GL<br>
+3d Graphics and other random stuff in C Open GL<br>
